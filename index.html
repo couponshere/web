@@ -849,8 +849,10 @@ Notes: {custom_notes}`;
     }
 
     async function generateReviewWithGemini() {
-     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-      if(!key) return showToast('Chưa lưu Gemini API Key!', 'error');
+      // API Key của bạn
+      const key = 'AIzaSy...'; // Điền key của bạn vào đây
+      
+      if(!key || key.includes('AIzaSy...')) return showToast('Vui lòng điền đúng API Key.', 'error');
 
       const btn = document.getElementById('generateWithAiBtn');
       const textSpan = document.getElementById('generateBtnText');
@@ -858,24 +860,24 @@ Notes: {custom_notes}`;
       const prodName = document.getElementById('aiProductName').value.trim() || 'Featured Product';
       const storeName = document.getElementById('aiStoreBrand').value.trim() || 'Online Store';
       const catText = document.getElementById('aiCategorySelect').options[document.getElementById('aiCategorySelect').selectedIndex]?.text || 'General';
-      const price = document.getElementById('aiProductPrice').value.trim() || 'Check price';
+      const price = document.getElementById('aiProductPrice').value.trim() || 'Check price at store';
       const coupon = document.getElementById('aiCouponCode').value.trim() || 'None';
 
-      const prompt = `Act as an affiliate marketing review writer. Analyze and write a review for:
-Product: ${prodName}
-Store: ${storeName}
-Category: ${catText}
-Price: ${price}
-Coupon: ${coupon}
-
-Return ONLY a valid JSON object without markdown fences, formatted exactly as:
-{"title":"${prodName} Review 2026","excerpt":"Great deal on this product.","fullContent":"<p>Review details...</p>"}`;
+      let promptTemplate = document.getElementById('adminCustomPromptEditor').value;
+      let prompt = promptTemplate
+        .replace('{product_name}', prodName)
+        .replace('{store_name}', storeName)
+        .replace('{category}', catText)
+        .replace('{price}', price)
+        .replace('{coupon}', coupon)
+        .replace('{custom_notes}', 'Focus on pricing, exclusive discounts, product value and ease of purchase.');
 
       try {
         btn.disabled = true; 
-        textSpan.innerHTML = 'Đang xử lý qua Gemini...';
+        textSpan.innerHTML = 'AI is writing review...';
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+        // Gọi model gemini-2.5-flash
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
           method: 'POST', 
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({contents:[{parts:[{text: prompt}]}]})
@@ -883,7 +885,7 @@ Return ONLY a valid JSON object without markdown fences, formatted exactly as:
 
         if(!res.ok) {
           const errData = await res.json();
-          throw new Error(errData?.error?.message || 'API request failed');
+          throw new Error(errData?.error?.message || 'API connection failed');
         }
 
         const data = await res.json();
@@ -901,15 +903,14 @@ Return ONLY a valid JSON object without markdown fences, formatted exactly as:
         
         const badge = document.getElementById('aiStatusBadge');
         badge.className = 'text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold';
-        badge.textContent = 'Bản nháp sẵn sàng';
+        badge.textContent = 'Draft Ready';
 
         showToast('Tạo bài viết thành công!', 'success');
       } catch(e) {
-        console.error(e);
         showToast('Lỗi: ' + e.message, 'error');
       } finally {
         btn.disabled = false; 
-        textSpan.innerHTML = 'Tạo bài viết qua Gemini';
+        textSpan.innerHTML = 'Generate Article via Gemini';
       }
     }
 
