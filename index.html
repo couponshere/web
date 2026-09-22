@@ -618,98 +618,124 @@ Notes: {custom_notes}`;
     let currentFilter = 'all';
 
     // --- KHỞI TẠO & ĐIỀU HƯỚNG BẰNG HASH ---
-    // --- 1. LẮNG NGHE SỰ KIỆN TẢI TRANG VÀ ĐỔI ROUTE ---
-    document.addEventListener('DOMContentLoaded', () => {
-      initApp();
-      handleUrlRoute(); // Kiểm tra URL khi người dùng F5 hoặc vừa vào web
-    });
+    // Lưu và đọc trang hiện tại để F5 không bao giờ bị nhảy trang
+    function getCurrentRoute() {
+      // 1. Ưu tiên đọc từ Hash (#admin)
+      const hash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (hash) return hash;
 
-    window.addEventListener('popstate', handleUrlRoute);
-    window.addEventListener('hashchange', handleUrlRoute);
+      // 2. Nếu không có hash, đọc từ đường dẫn path (/admin)
+      const path = window.location.pathname.replace(/^\/|\/$/g, '').trim();
+      if (path === 'admin') return 'admin';
 
-    // --- 2. HÀM ĐỌC URL KHI F5 ---
-    function handleUrlRoute() {
-      // Đọc route từ hash (#admin) hoặc từ pathname (/admin)
-      const hash = window.location.hash.replace(/^#/, '');
-      const path = window.location.pathname.replace(/^\/|\/$/g, '');
-      
-      const currentRoute = hash || path;
+      // 3. Nếu vẫn không có, kiểm tra xem trước khi F5 đang ở đâu
+      const savedPage = localStorage.getItem('ch_current_page');
+      if (savedPage) return savedPage;
 
-      if (currentRoute === 'admin') {
-        navigateTo('admin', false);
-      } else if (['coupons', 'stores', 'categories', 'blogs', 'about-us', 'contact-us', 'privacy-policy', 'terms-of-service', 'cookie-policy', 'disclaimer'].includes(currentRoute)) {
-        navigateTo(currentRoute, false);
-      } else {
-        navigateTo('home', false);
-      }
+      return 'home';
     }
 
-    // --- 3. HÀM CHUYỂN TRANG KHÔNG LÀM MẤT ROUTE KHI F5 ---
+    // Lắng nghe sự kiện khởi động trang
+    document.addEventListener('DOMContentLoaded', () => {
+      // Khởi tạo dữ liệu cơ sở trước (cấu hình, danh sách sản phẩm...)
+      if (typeof initApp === 'function') {
+        initApp();
+      }
+
+      // Xác định chính xác trang cần đứng khi vừa mở/F5
+      const targetRoute = getCurrentRoute();
+      navigateTo(targetRoute, false);
+    });
+
+    window.addEventListener('hashchange', () => {
+      const route = window.location.hash.replace(/^#\/?/, '').trim() || 'home';
+      navigateTo(route, false);
+    });
+
+    // Hàm điều hướng chính - đứng im tại admin khi F5
     function navigateTo(route, pushState = true) {
-      // Ẩn tất cả các khu vực giao diện
-      document.getElementById('frontendContainer')?.classList.add('hidden');
-      document.getElementById('staticPagesContainer')?.classList.add('hidden');
-      document.getElementById('adminLoginContainer')?.classList.add('hidden');
-      document.getElementById('adminContainer')?.classList.add('hidden');
-      document.getElementById('bottomStatsSection')?.classList.add('hidden');
+      // Chuẩn hóa tên route
+      if (!route) route = 'home';
+      
+      // Ghi nhớ trang hiện tại vào localStorage để bảo hiểm khi F5
+      localStorage.setItem('ch_current_page', route);
+
+      // 1. Ẩn tất cả các view
+      const frontendContainer = document.getElementById('frontendContainer');
+      const staticPagesContainer = document.getElementById('staticPagesContainer');
+      const adminLoginContainer = document.getElementById('adminLoginContainer');
+      const adminContainer = document.getElementById('adminContainer');
+      const bottomStatsSection = document.getElementById('bottomStatsSection');
+      const topAdminBar = document.getElementById('topAdminBar');
+
+      if (frontendContainer) frontendContainer.classList.add('hidden');
+      if (staticPagesContainer) staticPagesContainer.classList.add('hidden');
+      if (adminLoginContainer) adminLoginContainer.classList.add('hidden');
+      if (adminContainer) adminContainer.classList.add('hidden');
+      if (bottomStatsSection) bottomStatsSection.classList.add('hidden');
+      if (topAdminBar) topAdminBar.classList.add('hidden');
+
       document.querySelectorAll('#staticPagesContainer > div').forEach(p => p.classList.add('hidden'));
 
+      // 2. Xử lý riêng cho ROUTE ADMIN
+      if (route === 'admin') {
+        // Kiểm tra đăng nhập bằng localStorage (bền vững qua các lần F5)
+        const isLogged = localStorage.getItem('ch_admin_session') === 'true';
+
+        if (isLogged) {
+          // HIỂN THỊ ĐÚNG TRANG QUẢN TRỊ ADMIN
+          if (adminContainer) adminContainer.classList.remove('hidden');
+          if (topAdminBar) topAdminBar.classList.remove('hidden');
+
+          // Điền tên admin nếu có
+          const adminUserEl = document.getElementById('topAdminUsername');
+          if (adminUserEl) {
+            adminUserEl.textContent = localStorage.getItem('ch_auth_username') || 'admin';
+          }
+
+          // Nạp lại danh sách bảng và API key
+          if (typeof renderAdminTable === 'function') renderAdminTable();
+          if (typeof refreshApiKeyInputDisplay === 'function') refreshApiKeyInputDisplay();
+        } else {
+          // Chưa đăng nhập thì hiện Form đăng nhập Admin (vẫn ở màn hình Admin)
+          if (adminLoginContainer) adminLoginContainer.classList.remove('hidden');
+        }
+
+        // Cố định URL có dạng #admin để trình duyệt luôn nhận biết
+        if (window.location.hash !== '#admin') {
+          window.location.hash = 'admin';
+        }
+        return; // Dừng lại ở đây, tuyệt đối không chạy code bên dưới của trang chủ
+      }
+
+      // 3. Xử lý cho các trang người dùng thông thường
+      if (frontendContainer) frontendContainer.classList.remove('hidden');
+      
       const hero = document.getElementById('heroSection');
       const reviews = document.getElementById('reviewSection');
       const stores = document.getElementById('popularStoresSection');
       const cats = document.getElementById('categoriesSection');
 
-      if (route === 'admin') {
-        // Kiểm tra phiên đăng nhập đã lưu trong sessionStorage chưa
-        const session = sessionStorage.getItem('ch_admin_session');
-        const username = localStorage.getItem('ch_auth_username') || 'admin';
-
-        if (session === 'true') {
-          // Đã đăng nhập: Giữ nguyên màn hình Admin Dashboard
-          document.getElementById('adminContainer')?.classList.remove('hidden');
-          document.getElementById('topAdminBar')?.classList.remove('hidden');
-          const adminUserEl = document.getElementById('topAdminUsername');
-          if (adminUserEl) adminUserEl.textContent = username;
-          
-          renderAdminTable();
-          if (typeof refreshApiKeyInputDisplay === 'function') refreshApiKeyInputDisplay();
-        } else {
-          // Chưa đăng nhập: Giữ ở màn hình Form đăng nhập
-          document.getElementById('adminLoginContainer')?.classList.remove('hidden');
-          document.getElementById('topAdminBar')?.classList.add('hidden');
-        }
-
-        // Cập nhật hash trên URL để khi F5 trình duyệt vẫn giữ nguyên trang này
-        if (pushState) {
-          window.location.hash = 'admin';
-        }
+      if (route === 'home') {
+        if (hero) hero.classList.remove('hidden');
+        if (reviews) reviews.classList.remove('hidden');
+        if (stores) stores.classList.remove('hidden');
+        if (cats) cats.classList.remove('hidden');
+        if (bottomStatsSection) bottomStatsSection.classList.remove('hidden');
+        if (typeof setCategoryFilter === 'function') setCategoryFilter('all');
+        if (pushState) window.location.hash = '';
+      } else if (['coupons', 'stores', 'categories', 'blogs'].includes(route)) {
+        if (hero) hero.classList.add('hidden');
+        if (reviews) reviews.classList.remove('hidden');
+        if (pushState) window.location.hash = route;
       } else {
-        // Trang người dùng thông thường
-        hero?.classList.remove('hidden');
-        reviews?.classList.remove('hidden');
-        stores?.classList.remove('hidden');
-        cats?.classList.remove('hidden');
-
-        if (route === 'home') {
-          document.getElementById('frontendContainer')?.classList.remove('hidden');
-          document.getElementById('bottomStatsSection')?.classList.remove('hidden');
-          setCategoryFilter('all');
-        } else if (['coupons', 'stores', 'categories', 'blogs'].includes(route)) {
-          document.getElementById('frontendContainer')?.classList.remove('hidden');
-          hero?.classList.add('hidden');
-          if (route === 'coupons' || route === 'blogs') { stores?.classList.add('hidden'); cats?.classList.add('hidden'); setCategoryFilter('all'); }
-          else if (route === 'stores') { reviews?.classList.add('hidden'); cats?.classList.add('hidden'); }
-          else if (route === 'categories') { reviews?.classList.add('hidden'); stores?.classList.add('hidden'); }
-        } else {
-          document.getElementById('staticPagesContainer')?.classList.remove('hidden');
-          document.getElementById('page-' + route)?.classList.remove('hidden');
-        }
-
-        if (pushState) {
-          window.location.hash = route === 'home' ? '' : route;
-        }
+        if (frontendContainer) frontendContainer.classList.add('hidden');
+        if (staticPagesContainer) staticPagesContainer.classList.remove('hidden');
+        const pageEl = document.getElementById('page-' + route);
+        if (pageEl) pageEl.classList.remove('hidden');
+        if (pushState) window.location.hash = route;
       }
-
+    }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     // --- RENDERING ---
@@ -844,7 +870,7 @@ Notes: {custom_notes}`;
       const storedP = localStorage.getItem('ch_auth_password') || 'adminz23523f';
 
       if (u === storedU && p === storedP) {
-        sessionStorage.setItem('ch_admin_session', 'true');
+       localStorage.setItem('ch_admin_session', 'true');
         navigateTo('admin');
         showToast('Login successful', 'success');
       } else {
@@ -859,7 +885,8 @@ Notes: {custom_notes}`;
     }
 
     function handleAdminLogout() {
-      sessionStorage.removeItem('ch_admin_session');
+     localStorage.removeItem('ch_admin_session');
+     localStorage.removeItem('ch_current_page');
       navigateTo('home');
       showToast('Logged out securely', 'info');
     }
