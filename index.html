@@ -263,44 +263,127 @@
   </div>
 
   <!-- Admin Login View -->
-  <div id="adminLoginContainer" class="hidden flex-grow flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-slate-100">
-    <div class="max-w-md w-full bg-white rounded-3xl p-10 shadow-2xl border border-slate-200">
-      <div class="text-center mb-8">
-        <div class="w-16 h-16 rounded-2xl bg-brand-navy text-white flex items-center justify-center mx-auto mb-4 text-3xl font-bold shadow-lg">
-          <i class="fa-solid fa-lock"></i>
-        </div>
-        <h2 class="text-3xl font-black text-slate-900">Admin Portal</h2>
-        <p class="text-sm text-slate-500 mt-2 font-medium">Secure Access Only</p>
-      </div>
-      <form onsubmit="handleAdminLoginSubmit(event)" class="space-y-5 text-sm">
-        <div>
-          <label class="block font-black text-slate-700 uppercase tracking-wider mb-2 text-xs">Username</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400"><i class="fa-solid fa-user"></i></span>
-            <input type="text" id="loginUsernameInput" required placeholder="Enter username" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium text-slate-800">
-          </div>
-        </div>
-        <div>
-          <label class="block font-black text-slate-700 uppercase tracking-wider mb-2 text-xs">Password</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400"><i class="fa-solid fa-key"></i></span>
-            <input type="password" id="loginPasswordInput" required placeholder="Enter password" class="w-full pl-11 pr-12 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium text-slate-800">
-            <button type="button" onclick="toggleLoginPasswordVisibility()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer">
-              <i id="loginPasswordEyeIcon" class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div id="loginErrorMessage" class="hidden text-xs text-rose-600 font-bold bg-rose-50 border border-rose-200 p-3 rounded-xl flex items-center gap-2">
-          <i class="fa-solid fa-triangle-exclamation text-base"></i> Invalid credentials.
-        </div>
-        <button type="submit" class="w-full py-4 bg-brand-navy hover:bg-brand-navyDark text-white font-black text-base rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer mt-4">
-          <span>Sign In</span>
-          <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </form>
-    </div>
-  </div>
+  // --- 1. XỬ LÝ ĐĂNG NHẬP ADMIN ---
+    function handleAdminLoginSubmit(e) {
+      if (e) e.preventDefault(); // Ngăn chặn reload trang web
 
+      const u = document.getElementById('adminUsernameInput').value.trim();
+      const p = document.getElementById('adminPasswordInput').value.trim();
+
+      // Kiểm tra tài khoản mặc định
+      if ((u === 'Admin' || u === 'admin') && p === 'adminz2') {
+        localStorage.setItem('ch_admin_session', 'true');
+        localStorage.setItem('ch_auth_username', u);
+        localStorage.setItem('ch_current_page', 'admin');
+        
+        showToast('Đăng nhập thành công!', 'success');
+        navigateTo('admin', false);
+      } else {
+        showToast('Tài khoản hoặc mật khẩu không chính xác!', 'error');
+      }
+    }
+
+    function adminLogout() {
+      localStorage.removeItem('ch_admin_session');
+      localStorage.removeItem('ch_current_page');
+      showToast('Đã đăng xuất khỏi trang quản trị.', 'info');
+      navigateTo('home', true);
+    }
+
+    // --- 2. XÁC ĐỊNH ROUTE KHI MỞ TRANG HOẶC F5 ---
+    function checkCurrentRoute() {
+      // Đọc từ Hash (#admin) hoặc từ trang đã lưu trước khi F5
+      const hash = window.location.hash.replace(/^#\/?/, '').trim();
+      if (hash === 'admin') return 'admin';
+
+      const saved = localStorage.getItem('ch_current_page');
+      if (saved === 'admin') return 'admin';
+
+      return hash || 'home';
+    }
+
+    // --- 3. HÀM ĐIỀU HƯỚNG BẢO ĐẢM KHÔNG BỊ NHẢY TRANG KHI F5 ---
+    function navigateTo(route, pushState = true) {
+      if (!route) route = 'home';
+
+      // Ẩn tất cả các khu vực giao diện
+      const elIds = ['frontendContainer', 'staticPagesContainer', 'adminLoginContainer', 'adminContainer', 'bottomStatsSection', 'topAdminBar'];
+      elIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+
+      document.querySelectorAll('#staticPagesContainer > div').forEach(p => p.classList.add('hidden'));
+
+      // Xử lý riêng cho màn Admin
+      if (route === 'admin') {
+        localStorage.setItem('ch_current_page', 'admin');
+        window.location.hash = 'admin'; // Cố định hash #admin
+
+        const isLogged = localStorage.getItem('ch_admin_session') === 'true';
+
+        if (isLogged) {
+          // Đã đăng nhập -> Hiện Dashboard quản trị
+          document.getElementById('adminContainer')?.classList.remove('hidden');
+          document.getElementById('topAdminBar')?.classList.remove('hidden');
+          
+          const adminUserEl = document.getElementById('topAdminUsername');
+          if (adminUserEl) adminUserEl.textContent = localStorage.getItem('ch_auth_username') || 'Admin';
+
+          if (typeof renderAdminTable === 'function') renderAdminTable();
+          if (typeof refreshApiKeyInputDisplay === 'function') refreshApiKeyInputDisplay();
+        } else {
+          // Chưa đăng nhập -> Hiện Form đăng nhập
+          document.getElementById('adminLoginContainer')?.classList.remove('hidden');
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return; // Dừng, không cho chạy tiếp xuống trang chủ
+      }
+
+      // Nếu không phải admin -> Về các trang ngoài
+      localStorage.setItem('ch_current_page', route);
+      const frontendContainer = document.getElementById('frontendContainer');
+      const hero = document.getElementById('heroSection');
+      const reviews = document.getElementById('reviewSection');
+      const stores = document.getElementById('popularStoresSection');
+      const cats = document.getElementById('categoriesSection');
+      const bottomStats = document.getElementById('bottomStatsSection');
+
+      if (route === 'home') {
+        frontendContainer?.classList.remove('hidden');
+        hero?.classList.remove('hidden');
+        reviews?.classList.remove('hidden');
+        stores?.classList.remove('hidden');
+        cats?.classList.remove('hidden');
+        bottomStats?.classList.remove('hidden');
+        if (typeof setCategoryFilter === 'function') setCategoryFilter('all');
+        if (pushState) window.location.hash = '';
+      } else if (['coupons', 'stores', 'categories', 'blogs'].includes(route)) {
+        frontendContainer?.classList.remove('hidden');
+        hero?.classList.add('hidden');
+        reviews?.classList.remove('hidden');
+        if (pushState) window.location.hash = route;
+      } else {
+        document.getElementById('staticPagesContainer')?.classList.remove('hidden');
+        document.getElementById('page-' + route)?.classList.remove('hidden');
+        if (pushState) window.location.hash = route;
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- 4. LẮNG NGHE SỰ KIỆN KHI TẢI TRANG HOẶC ĐỔI HASH ---
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof initApp === 'function') initApp();
+      const initialRoute = checkCurrentRoute();
+      navigateTo(initialRoute, false);
+    });
+
+    window.addEventListener('hashchange', () => {
+      const currentHash = window.location.hash.replace(/^#\/?/, '').trim() || 'home';
+      navigateTo(currentHash, false);
+    });
   <!-- Admin Dashboard Container -->
   <div id="adminContainer" class="hidden flex-grow bg-slate-100 py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-6xl mx-auto">
