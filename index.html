@@ -850,7 +850,7 @@ Notes: {custom_notes}`;
 
     async function generateReviewWithGemini() {
       const key = localStorage.getItem('ch_gemini_key') || document.getElementById('adminApiKeyInput').value.trim();
-      if(!key) return showToast('Missing Gemini API Key! Please save your key above.', 'error');
+      if(!key) return showToast('Chưa lưu Gemini API Key!', 'error');
 
       const btn = document.getElementById('generateWithAiBtn');
       const textSpan = document.getElementById('generateBtnText');
@@ -858,29 +858,33 @@ Notes: {custom_notes}`;
       const prodName = document.getElementById('aiProductName').value.trim() || 'Featured Product';
       const storeName = document.getElementById('aiStoreBrand').value.trim() || 'Online Store';
       const catText = document.getElementById('aiCategorySelect').options[document.getElementById('aiCategorySelect').selectedIndex]?.text || 'General';
-      const price = document.getElementById('aiProductPrice').value.trim() || 'Check price at store';
+      const price = document.getElementById('aiProductPrice').value.trim() || 'Check price';
       const coupon = document.getElementById('aiCouponCode').value.trim() || 'None';
 
-      let promptTemplate = document.getElementById('adminCustomPromptEditor').value;
-      let prompt = promptTemplate
-        .replace('{product_name}', prodName)
-        .replace('{store_name}', storeName)
-        .replace('{category}', catText)
-        .replace('{price}', price)
-        .replace('{coupon}', coupon)
-        .replace('{custom_notes}', 'Focus on pricing, exclusive discounts, product value and ease of purchase.');
+      const prompt = `Act as an affiliate marketing review writer. Analyze and write a review for:
+Product: ${prodName}
+Store: ${storeName}
+Category: ${catText}
+Price: ${price}
+Coupon: ${coupon}
+
+Return ONLY a valid JSON object without markdown fences, formatted exactly as:
+{"title":"${prodName} Review 2026","excerpt":"Great deal on this product.","fullContent":"<p>Review details...</p>"}`;
 
       try {
         btn.disabled = true; 
-        textSpan.innerHTML = 'AI is writing review...';
+        textSpan.innerHTML = 'Đang xử lý qua Gemini...';
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
           method: 'POST', 
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({contents:[{parts:[{text: prompt}]}]})
         });
 
-        if(!res.ok) throw new Error('API connection failed');
+        if(!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData?.error?.message || 'API request failed');
+        }
 
         const data = await res.json();
         const rawContent = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
@@ -897,14 +901,15 @@ Notes: {custom_notes}`;
         
         const badge = document.getElementById('aiStatusBadge');
         badge.className = 'text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold';
-        badge.textContent = 'Draft Ready';
+        badge.textContent = 'Bản nháp sẵn sàng';
 
-        showToast('Review generated successfully!', 'success');
+        showToast('Tạo bài viết thành công!', 'success');
       } catch(e) {
-        showToast('Generation failed. Please verify your Gemini API key.', 'error');
+        console.error(e);
+        showToast('Lỗi: ' + e.message, 'error');
       } finally {
         btn.disabled = false; 
-        textSpan.innerHTML = 'Generate Article via Gemini';
+        textSpan.innerHTML = 'Tạo bài viết qua Gemini';
       }
     }
 
