@@ -618,52 +618,98 @@ Notes: {custom_notes}`;
     let currentFilter = 'all';
 
     // --- KHỞI TẠO & ĐIỀU HƯỚNG BẰNG HASH ---
+    // --- 1. LẮNG NGHE SỰ KIỆN TẢI TRANG VÀ ĐỔI ROUTE ---
     document.addEventListener('DOMContentLoaded', () => {
       initApp();
-      handleUrlRoute();
+      handleUrlRoute(); // Kiểm tra URL khi người dùng F5 hoặc vừa vào web
     });
 
-    // Lắng nghe sự thay đổi hash trên thanh URL
+    window.addEventListener('popstate', handleUrlRoute);
     window.addEventListener('hashchange', handleUrlRoute);
 
+    // --- 2. HÀM ĐỌC URL KHI F5 ---
     function handleUrlRoute() {
-      // Lấy phần phía sau dấu # (ví dụ: #admin -> admin)
-      const route = window.location.hash.replace('#', '') || 'home';
-      navigateTo(route, false);
+      // Đọc route từ hash (#admin) hoặc từ pathname (/admin)
+      const hash = window.location.hash.replace(/^#/, '');
+      const path = window.location.pathname.replace(/^\/|\/$/g, '');
+      
+      const currentRoute = hash || path;
+
+      if (currentRoute === 'admin') {
+        navigateTo('admin', false);
+      } else if (['coupons', 'stores', 'categories', 'blogs', 'about-us', 'contact-us', 'privacy-policy', 'terms-of-service', 'cookie-policy', 'disclaimer'].includes(currentRoute)) {
+        navigateTo(currentRoute, false);
+      } else {
+        navigateTo('home', false);
+      }
     }
 
+    // --- 3. HÀM CHUYỂN TRANG KHÔNG LÀM MẤT ROUTE KHI F5 ---
     function navigateTo(route, pushState = true) {
-      // Ẩn tất cả các view trước
-      document.getElementById('frontendContainer').classList.add('hidden');
-      document.getElementById('staticPagesContainer').classList.add('hidden');
-      document.getElementById('adminLoginContainer').classList.add('hidden');
-      document.getElementById('adminContainer').classList.add('hidden');
-      document.getElementById('bottomStatsSection').classList.add('hidden');
-      
+      // Ẩn tất cả các khu vực giao diện
+      document.getElementById('frontendContainer')?.classList.add('hidden');
+      document.getElementById('staticPagesContainer')?.classList.add('hidden');
+      document.getElementById('adminLoginContainer')?.classList.add('hidden');
+      document.getElementById('adminContainer')?.classList.add('hidden');
+      document.getElementById('bottomStatsSection')?.classList.add('hidden');
       document.querySelectorAll('#staticPagesContainer > div').forEach(p => p.classList.add('hidden'));
 
+      const hero = document.getElementById('heroSection');
+      const reviews = document.getElementById('reviewSection');
+      const stores = document.getElementById('popularStoresSection');
+      const cats = document.getElementById('categoriesSection');
+
       if (route === 'admin') {
+        // Kiểm tra phiên đăng nhập đã lưu trong sessionStorage chưa
         const session = sessionStorage.getItem('ch_admin_session');
+        const username = localStorage.getItem('ch_auth_username') || 'admin';
+
         if (session === 'true') {
-          document.getElementById('adminContainer').classList.remove('hidden');
-          document.getElementById('topAdminBar').classList.remove('hidden');
+          // Đã đăng nhập: Giữ nguyên màn hình Admin Dashboard
+          document.getElementById('adminContainer')?.classList.remove('hidden');
+          document.getElementById('topAdminBar')?.classList.remove('hidden');
+          const adminUserEl = document.getElementById('topAdminUsername');
+          if (adminUserEl) adminUserEl.textContent = username;
+          
           renderAdminTable();
+          if (typeof refreshApiKeyInputDisplay === 'function') refreshApiKeyInputDisplay();
         } else {
-          // Hiển thị khung đăng nhập
-          document.getElementById('adminLoginContainer').classList.remove('hidden');
-          document.getElementById('topAdminBar').classList.add('hidden');
+          // Chưa đăng nhập: Giữ ở màn hình Form đăng nhập
+          document.getElementById('adminLoginContainer')?.classList.remove('hidden');
+          document.getElementById('topAdminBar')?.classList.add('hidden');
+        }
+
+        // Cập nhật hash trên URL để khi F5 trình duyệt vẫn giữ nguyên trang này
+        if (pushState) {
+          window.location.hash = 'admin';
         }
       } else {
-        // Trở về trang chủ hoặc trang tĩnh
-        document.getElementById('frontendContainer').classList.remove('hidden');
-        document.getElementById('bottomStatsSection').classList.remove('hidden');
-        setCategoryFilter('all');
+        // Trang người dùng thông thường
+        hero?.classList.remove('hidden');
+        reviews?.classList.remove('hidden');
+        stores?.classList.remove('hidden');
+        cats?.classList.remove('hidden');
+
+        if (route === 'home') {
+          document.getElementById('frontendContainer')?.classList.remove('hidden');
+          document.getElementById('bottomStatsSection')?.classList.remove('hidden');
+          setCategoryFilter('all');
+        } else if (['coupons', 'stores', 'categories', 'blogs'].includes(route)) {
+          document.getElementById('frontendContainer')?.classList.remove('hidden');
+          hero?.classList.add('hidden');
+          if (route === 'coupons' || route === 'blogs') { stores?.classList.add('hidden'); cats?.classList.add('hidden'); setCategoryFilter('all'); }
+          else if (route === 'stores') { reviews?.classList.add('hidden'); cats?.classList.add('hidden'); }
+          else if (route === 'categories') { reviews?.classList.add('hidden'); stores?.classList.add('hidden'); }
+        } else {
+          document.getElementById('staticPagesContainer')?.classList.remove('hidden');
+          document.getElementById('page-' + route)?.classList.remove('hidden');
+        }
+
+        if (pushState) {
+          window.location.hash = route === 'home' ? '' : route;
+        }
       }
 
-      // Cập nhật URL dạng #route thay vì /route để tránh lỗi 404
-      if (pushState) {
-        window.location.hash = route === 'home' ? '' : '#' + route;
-      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     // --- RENDERING ---
