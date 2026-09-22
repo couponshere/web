@@ -910,14 +910,13 @@ Notes: {custom_notes}`;
     }
 
     // --- GỌI GEMINI API SỬ DỤNG CHÍNH XÁC KEY ĐÃ LƯU ---
-    async function generateReviewWithGemini() {
-      // Đọc trực tiếp từ localStorage để lấy key gốc đầy đủ
+   async function generateReviewWithGemini() {
       let key = localStorage.getItem('ch_gemini_key') || '';
       key = key.trim();
 
       if (!key) {
         document.getElementById('adminApiKeyInput').focus();
-        return showToast('Chưa có Gemini API Key! Hãy dán và lưu key ở khung phía trên.', 'error');
+        return showToast('Chưa có Gemini API Key! Hãy lưu key ở ô phía trên.', 'error');
       }
 
       const btn = document.getElementById('generateWithAiBtn');
@@ -929,35 +928,41 @@ Notes: {custom_notes}`;
       const price = document.getElementById('aiProductPrice').value.trim() || 'Check price at store';
       const coupon = document.getElementById('aiCouponCode').value.trim() || 'None';
 
-      let promptTemplate = document.getElementById('adminCustomPromptEditor').value || DEFAULT_PROMPT;
-      let prompt = promptTemplate
-        .replace('{product_name}', prodName)
-        .replace('{store_name}', storeName)
-        .replace('{category}', catText)
-        .replace('{price}', price)
-        .replace('{coupon}', coupon)
-        .replace('{custom_notes}', 'Focus on pricing, discounts, specifications and purchase CTA.');
+      const prompt = `Act as an affiliate marketing review expert. Analyze the product below and return ONLY a valid JSON string (no markdown, no backticks):
+{
+  "title": "${prodName} Review 2026: Best Deal & Exclusive Discounts",
+  "excerpt": "Get the best deal on ${prodName} at ${storeName}. Highlighting key features, pricing from ${price}, and verified discount codes.",
+  "fullContent": "<p>Detailed review covering product overview, key specifications, pricing details, and purchase recommendations.</p>"
+}
+Product: ${prodName}
+Store: ${storeName}
+Category: ${catText}
+Price: ${price}
+Coupon: ${coupon}`;
 
       try {
         btn.disabled = true; 
-        textSpan.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Gemini (${formatMaskedKey(key)}) đang viết...`;
+        textSpan.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Gemini (3.8-flash) đang viết...`;
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${encodeURIComponent(key)}`, {
+        // Gọi trực tiếp model gemini-3.8-flash
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(key)}`, {
           method: 'POST', 
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({contents:[{parts:[{text: prompt}]}]})
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
         });
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          const errMsg = errData?.error?.message || `Lỗi máy chủ HTTP ${res.status}`;
-          throw new Error(errMsg);
+          throw new Error(errData?.error?.message || `Lỗi HTTP ${res.status}`);
         }
 
         const data = await res.json();
         const rawContent = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
         const parsed = JSON.parse(rawContent);
 
+        // Đổ dữ liệu vào khung soạn thảo bài viết
         document.getElementById('editAiTitle').value = parsed.title || `${prodName} Review 2026`;
         document.getElementById('editAiExcerpt').value = parsed.excerpt || '';
         document.getElementById('editAiContent').value = parsed.fullContent || '';
@@ -972,7 +977,7 @@ Notes: {custom_notes}`;
         badge.textContent = 'Draft Ready';
 
         showToast('Tạo bài viết thành công!', 'success');
-      } catch(e) {
+      } catch (e) {
         console.error("Gemini Error:", e);
         showToast('Lỗi: ' + e.message, 'error');
       } finally {
