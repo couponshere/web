@@ -610,43 +610,23 @@ Notes: {custom_notes}`;
     let articles = [];
     let currentFilter = 'all';
 
-    // --- INIT & ROUTING ---
+    // --- KHỞI TẠO & ĐIỀU HƯỚNG BẰNG HASH ---
     document.addEventListener('DOMContentLoaded', () => {
       initApp();
       handleUrlRoute();
     });
 
-    window.addEventListener('popstate', handleUrlRoute);
+    // Lắng nghe sự thay đổi hash trên thanh URL
+    window.addEventListener('hashchange', handleUrlRoute);
 
     function handleUrlRoute() {
-      const path = window.location.pathname.replace(/^\/|\/$/g, ''); 
-      const validRoutes = ['coupons', 'stores', 'categories', 'blogs', 'about-us', 'contact-us', 'privacy-policy', 'terms-of-service', 'cookie-policy', 'disclaimer'];
-      if (path === 'admin') navigateTo('admin', false);
-      else if (validRoutes.includes(path)) navigateTo(path, false);
-      else navigateTo('home', false);
-    }
-
-    function initApp() {
-      if (!localStorage.getItem('ch_articles')) localStorage.setItem('ch_articles', JSON.stringify(DEFAULT_ARTICLES));
-      articles = JSON.parse(localStorage.getItem('ch_articles'));
-      if (!localStorage.getItem('ch_homepage')) localStorage.setItem('ch_homepage', JSON.stringify(DEFAULT_HOMEPAGE));
-      if (!localStorage.getItem('ch_custom_prompt')) localStorage.setItem('ch_custom_prompt', DEFAULT_PROMPT);
-
-      const catSelect = document.getElementById('aiCategorySelect');
-      if (catSelect) {
-        catSelect.innerHTML = DEFAULT_CATEGORIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      }
-
-      renderStores();
-      renderCategories();
-      applySettings();
-      renderArticles();
-      updateStats();
-      
-      articles.sort((a,b) => b.clicks - a.clicks);
+      // Lấy phần phía sau dấu # (ví dụ: #admin -> admin)
+      const route = window.location.hash.replace('#', '') || 'home';
+      navigateTo(route, false);
     }
 
     function navigateTo(route, pushState = true) {
+      // Ẩn tất cả các view trước
       document.getElementById('frontendContainer').classList.add('hidden');
       document.getElementById('staticPagesContainer').classList.add('hidden');
       document.getElementById('adminLoginContainer').classList.add('hidden');
@@ -654,49 +634,31 @@ Notes: {custom_notes}`;
       document.getElementById('bottomStatsSection').classList.add('hidden');
       
       document.querySelectorAll('#staticPagesContainer > div').forEach(p => p.classList.add('hidden'));
-      
-      const hero = document.getElementById('heroSection');
-      const reviews = document.getElementById('reviewSection');
-      const stores = document.getElementById('popularStoresSection');
-      const cats = document.getElementById('categoriesSection');
-      
-      hero.classList.remove('hidden'); reviews.classList.remove('hidden'); 
-      stores.classList.remove('hidden'); cats.classList.remove('hidden');
 
-      if (route === 'home') {
-        document.getElementById('frontendContainer').classList.remove('hidden');
-        document.getElementById('bottomStatsSection').classList.remove('hidden');
-        setCategoryFilter('all');
-      } else if (['coupons', 'stores', 'categories', 'blogs'].includes(route)) {
-        document.getElementById('frontendContainer').classList.remove('hidden');
-        hero.classList.add('hidden'); 
-        if (route === 'coupons' || route === 'blogs') { stores.classList.add('hidden'); cats.classList.add('hidden'); setCategoryFilter('all'); }
-        else if (route === 'stores') { reviews.classList.add('hidden'); cats.classList.add('hidden'); }
-        else if (route === 'categories') { reviews.classList.add('hidden'); stores.classList.add('hidden'); }
-      } else if (route === 'admin') {
-        const u = localStorage.getItem('ch_auth_username') || 'admin';
+      if (route === 'admin') {
         const session = sessionStorage.getItem('ch_admin_session');
         if (session === 'true') {
           document.getElementById('adminContainer').classList.remove('hidden');
           document.getElementById('topAdminBar').classList.remove('hidden');
-          document.getElementById('topAdminUsername').textContent = u;
           renderAdminTable();
-          document.getElementById('adminCustomPromptEditor').value = localStorage.getItem('ch_custom_prompt') || DEFAULT_PROMPT;
-          document.getElementById('adminApiKeyInput').value = localStorage.getItem('ch_gemini_key') || '';
         } else {
+          // Hiển thị khung đăng nhập
           document.getElementById('adminLoginContainer').classList.remove('hidden');
           document.getElementById('topAdminBar').classList.add('hidden');
         }
       } else {
-        document.getElementById('staticPagesContainer').classList.remove('hidden');
-        const page = document.getElementById('page-' + route);
-        if (page) page.classList.remove('hidden');
+        // Trở về trang chủ hoặc trang tĩnh
+        document.getElementById('frontendContainer').classList.remove('hidden');
+        document.getElementById('bottomStatsSection').classList.remove('hidden');
+        setCategoryFilter('all');
       }
 
-      if (pushState) window.history.pushState({route}, '', route === 'home' ? '/' : '/' + route);
+      // Cập nhật URL dạng #route thay vì /route để tránh lỗi 404
+      if (pushState) {
+        window.location.hash = route === 'home' ? '' : '#' + route;
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
     // --- RENDERING ---
     function updateStats() {
       document.getElementById('statOffers').textContent = articles.length;
