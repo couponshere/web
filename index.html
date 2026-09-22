@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coupons Here - Find Better. Buy Smarter | Deal & Affiliate Reviews</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
+    .hero-gradient { background: linear-gradient(180deg, #122c54 0%, #173868 50%, #1b427b 100%); }
+    .stat-card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s ease; }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    .store-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .store-card:hover { box-shadow: 0 10px 20px -5px rgba(18, 44, 84, 0.12); transform: translateY(-2px); }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    /* Code Blur Effect */
+    .code-blur {
+      filter: blur(5px);
+      user-select: none;
+      transition: filter 0.3s ease;
+    }
+    .code-revealed {
+      filter: blur(0);
+      user-select: auto;
+    }
+  </style>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#122c54',
+              navyDark: '#0a1a33',
+              navyLight: '#1b427b',
+              accent: '#e63946',
+              accentHover: '#d62828',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-accent selection:text-white">
+
+  <!-- Top Admin Notification Bar -->
+  <div id="topAdminBar" class="bg-brand-navyDark text-white text-xs py-2 px-4 border-b border-white/10 hidden transition-all duration-300">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Authenticated as <strong id="topAdminUsername">admin</strong></span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="navigateTo('admin')" class="hover:text-amber-300 font-semibold flex items-center gap-1.5 transition cursor-pointer">
+          <i class="fa-solid fa-gauge-high"></i> <span>Dashboard</span>
+        </button>
+        <button onclick="handleAdminLogout()" class="hover:text-red-400 font-semibold flex items-center gap-1.5 transition cursor-pointer">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <a href="javascript:void(0)" onclick="navigateTo('home')" class="flex items-center gap-2.5 cursor-pointer">
+        <div class="w-9 h-9 rounded-xl bg-brand-accent flex items-center justify-center text-white font-black text-lg shadow-sm">
+          %
+        </div>
+        <span id="navBrandName" class="text-xl font-black tracking-tight text-slate-900 select-none hidden sm:block">
+          Coupons<span class="text-brand-navy font-black">Here</span>
+        </span>
+      </a>
+
+      <!-- Header Search Input -->
+      <div class="flex-1 max-w-xl mx-4">
+        <div class="relative w-full">
+          <input 
+            type="text" 
+            id="navSearchInput" 
+            onkeyup="handleHeaderSearch(event)"
+            placeholder="Search codes, stores, articles..." 
+            class="w-full pl-10 pr-20 py-2 text-sm rounded-full border border-slate-200 focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent/30 transition shadow-sm"
+          >
+          <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-4 top-3 text-sm"></i>
+          <button onclick="triggerHeaderSearch()" class="absolute right-1.5 top-1.5 bottom-1.5 px-5 bg-brand-accent hover:bg-brand-accentHover text-white text-xs font-bold rounded-full transition shadow-xs cursor-pointer">
+            Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="hidden lg:flex items-center space-x-6 text-sm font-bold text-slate-600">
+        <a href="javascript:void(0)" onclick="navigateTo('coupons')" class="hover:text-brand-accent transition cursor-pointer">Coupons</a>
+        <a href="javascript:void(0)" onclick="navigateTo('coupons')" class="hover:text-brand-accent transition cursor-pointer">Deals</a>
+        <a href="javascript:void(0)" onclick="navigateTo('stores')" class="hover:text-brand-accent transition cursor-pointer">Stores</a>
+        <a href="javascript:void(0)" onclick="navigateTo('categories')" class="hover:text-brand-accent transition cursor-pointer">Categories</a>
+        <a href="javascript:void(0)" onclick="navigateTo('blogs')" class="hover:text-brand-accent transition cursor-pointer">Blog</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Public Frontend View -->
+  <div id="frontendContainer" class="flex-grow flex flex-col">
+    
+    <!-- HERO BANNER -->
+    <section id="heroSection" class="hero-gradient text-white py-16 md:py-24 px-4 relative overflow-hidden">
+      <div class="absolute -top-24 -left-24 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+        <h1 id="heroTitleDisplay" class="text-4xl md:text-6xl font-black tracking-tight mb-4 text-white select-none">
+          Coupons Here
+        </h1>
+        <p id="heroSloganDisplay" class="text-sm md:text-base font-bold text-blue-200 tracking-wider mb-3 uppercase">
+          Find Better. Buy Smarter.
+        </p>
+        <p id="heroDescDisplay" class="text-sm md:text-base text-slate-200/90 max-w-2xl mx-auto font-medium leading-relaxed">
+          Coupons Here is a trusted destination for discovering online coupons, exclusive deals, and helpful product reviews. We help shoppers find better products, compare their options, and save more when shopping online.
+        </p>
+      </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-grow bg-slate-50/50">
+      
+      <!-- Review Section -->
+      <div id="reviewSection">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-slate-200">
+          <div class="flex items-center gap-3">
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Review</h2>
+            <div id="activeFilterPill" class="hidden items-center gap-1.5 bg-brand-accent/10 text-brand-accent text-xs px-3 py-1.5 rounded-full font-bold border border-brand-accent/20">
+              <span id="activeFilterName">Category</span>
+              <button onclick="setCategoryFilter('all')" class="hover:text-red-700 ml-1 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 text-sm">
+            <span class="text-slate-500 font-medium" id="articleCountText">Showing all articles</span>
+            <button onclick="setCategoryFilter('all')" class="text-brand-accent hover:text-brand-accentHover font-bold flex items-center gap-1.5 cursor-pointer">
+              <span>View All</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="articlesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Dynamically rendered via JavaScript -->
+        </div>
+
+        <div id="emptyState" class="hidden text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm my-8">
+          <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
+          <h3 class="text-lg font-black text-slate-800 mb-1">No articles found</h3>
+          <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">Try searching for other keywords or clear your current filters.</p>
+          <button onclick="resetFilters()" class="px-6 py-2.5 bg-brand-navy hover:bg-brand-navyDark text-white text-sm font-bold rounded-xl transition shadow-md cursor-pointer">
+            Clear Filters & Show All
+          </button>
+        </div>
+      </div>
+
+      <!-- Popular Stores -->
+      <section id="popularStoresSection" class="mt-20 pt-10 border-t border-slate-200">
+        <div class="text-center mb-10">
+          <h3 class="text-2xl font-black text-slate-900 mb-2">Popular Stores</h3>
+          <p class="text-sm text-slate-500 font-medium">Shop top brands with verified affiliate deals</p>
+        </div>
+        <div id="popularStoresContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          <!-- Populated by JavaScript -->
+        </div>
+      </section>
+
+      <!-- Categories Section -->
+      <section id="categoriesSection" class="mt-20 pt-10 border-t border-slate-200">
+        <div class="text-center mb-10">
+          <h3 class="text-2xl font-black text-slate-900 mb-2">Categories</h3>
+          <p class="text-sm text-slate-500 font-medium">Browse deals and reviews by department</p>
+        </div>
+        <div id="categoriesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Stats Section -->
+    <section id="bottomStatsSection" class="bg-white py-16 border-t border-slate-200">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="grid grid-cols-3 gap-6 text-center">
+          <div class="stat-card rounded-3xl p-6">
+            <div class="text-brand-accent text-3xl mb-2"><i class="fa-solid fa-tags"></i></div>
+            <div id="statOffers" class="text-3xl md:text-5xl font-black text-slate-900 mb-1">0</div>
+            <div class="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-wider">Active Offers</div>
+          </div>
+          <div class="stat-card rounded-3xl p-6">
+            <div class="text-brand-navy text-3xl mb-2"><i class="fa-solid fa-shop"></i></div>
+            <div id="statStores" class="text-3xl md:text-5xl font-black text-slate-900 mb-1">0</div>
+            <div class="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-wider">Stores</div>
+          </div>
+          <div class="stat-card rounded-3xl p-6">
+            <div class="text-emerald-500 text-3xl mb-2"><i class="fa-solid fa-layer-group"></i></div>
+            <div id="statCategories" class="text-3xl md:text-5xl font-black text-slate-900 mb-1">0</div>
+            <div class="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-wider">Categories</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Static Pages Container (Policies, About, Contact) -->
+  <div id="staticPagesContainer" class="hidden flex-grow w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
+    <!-- About Us -->
+    <div id="page-about-us" class="hidden text-sm text-slate-700 leading-relaxed">
+      <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-6">About Us</h1>
+      <p class="mb-6 text-base">Welcome to Coupons Here, your trusted destination for finding verified coupon codes, promo codes, and online discount deals from leading U.S. retailers.</p>
+      <h2 class="text-xl font-bold text-slate-900 mt-8 mb-3">Who We Are</h2>
+      <p class="mb-4">couponshere.top is the Top Hub of US Online Coupons. We built this platform to help American shoppers save money by bringing together the best publicly available offers in one easy-to-browse place.</p>
+    </div>
+
+    <!-- Contact Us -->
+    <div id="page-contact-us" class="hidden">
+      <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-2">Contact Us</h1>
+      <p class="text-sm text-slate-500 mb-8">Questions or feedback? Fill out the form below to email <strong>admin@couponshere.top</strong>.</p>
+      <form onsubmit="event.preventDefault(); showToast('Message sent!', 'success'); this.reset();" class="max-w-xl space-y-5 text-sm">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1.5">Full Name</label>
+          <input type="text" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/30 focus:border-brand-accent outline-none">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1.5">Email Address</label>
+          <input type="email" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/30 focus:border-brand-accent outline-none">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1.5">Message</label>
+          <textarea rows="5" required class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-accent/30 focus:border-brand-accent outline-none"></textarea>
+        </div>
+        <button type="submit" class="w-full py-4 bg-brand-navy hover:bg-brand-navyDark text-white font-bold rounded-xl shadow-md transition cursor-pointer">
+          Send Message
+        </button>
+      </form>
+    </div>
+
+    <!-- Legal Pages -->
+    <div id="page-privacy-policy" class="hidden text-sm text-slate-700 leading-relaxed"><h1 class="text-3xl font-black text-slate-900 mb-6">Privacy Policy</h1><p>Privacy policy content for couponshere.top...</p></div>
+    <div id="page-terms-of-service" class="hidden text-sm text-slate-700 leading-relaxed"><h1 class="text-3xl font-black text-slate-900 mb-6">Terms of Service</h1><p>Terms of service content for couponshere.top...</p></div>
+    <div id="page-cookie-policy" class="hidden text-sm text-slate-700 leading-relaxed"><h1 class="text-3xl font-black text-slate-900 mb-6">Cookie Policy</h1><p>Cookie policy content for couponshere.top...</p></div>
+    <div id="page-disclaimer" class="hidden text-sm text-slate-700 leading-relaxed"><h1 class="text-3xl font-black text-slate-900 mb-6">Disclaimer</h1><p>Affiliate disclosure and disclaimer for couponshere.top...</p></div>
+  </div>
+
+  <!-- Admin Login View -->
+  <div id="adminLoginContainer" class="hidden flex-grow flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-slate-100">
+    <div class="max-w-md w-full bg-white rounded-3xl p-10 shadow-2xl border border-slate-200">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 rounded-2xl bg-brand-navy text-white flex items-center justify-center mx-auto mb-4 text-3xl font-bold shadow-lg">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h2 class="text-3xl font-black text-slate-900">Admin Portal</h2>
+        <p class="text-sm text-slate-500 mt-2 font-medium">Secure Access Only</p>
+      </div>
+      <form onsubmit="handleAdminLoginSubmit(event)" class="space-y-5 text-sm">
+        <div>
+          <label class="block font-black text-slate-700 uppercase tracking-wider mb-2 text-xs">Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400"><i class="fa-solid fa-user"></i></span>
+            <input type="text" id="loginUsernameInput" required placeholder="Enter username" class="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium text-slate-800">
+          </div>
+        </div>
+        <div>
+          <label class="block font-black text-slate-700 uppercase tracking-wider mb-2 text-xs">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400"><i class="fa-solid fa-key"></i></span>
+            <input type="password" id="loginPasswordInput" required placeholder="Enter password" class="w-full pl-11 pr-12 py-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium text-slate-800">
+            <button type="button" onclick="toggleLoginPasswordVisibility()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer">
+              <i id="loginPasswordEyeIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div id="loginErrorMessage" class="hidden text-xs text-rose-600 font-bold bg-rose-50 border border-rose-200 p-3 rounded-xl flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-base"></i> Invalid credentials.
+        </div>
+        <button type="submit" class="w-full py-4 bg-brand-navy hover:bg-brand-navyDark text-white font-black text-base rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer mt-4">
+          <span>Sign In</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard Container -->
+  <div id="adminContainer" class="hidden flex-grow bg-slate-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="bg-white rounded-3xl p-6 shadow-xs border border-slate-200 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="px-3 py-1 rounded-full text-[10px] font-black bg-brand-accent text-white uppercase tracking-wider">Coupons Here Engine</span>
+            <span class="flex items-center gap-1.5 text-[11px] text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full font-bold">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Gemini AI Active
+            </span>
+          </div>
+          <h2 class="text-3xl font-black text-slate-900">Admin Command Center</h2>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="navigateTo('home')" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold transition flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-desktop"></i> <span>Live Site</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex border-b border-slate-200 mb-8 space-x-2 overflow-x-auto pb-1">
+        <button id="adminTab1Btn" onclick="switchAdminTab('writer')" class="px-5 py-3 text-sm font-black border-b-2 border-brand-accent text-brand-accent transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> AI Writer
+        </button>
+        <button id="adminTab2Btn" onclick="switchAdminTab('customizer')" class="px-5 py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-sliders"></i> Homepage
+        </button>
+        <button id="adminTab3Btn" onclick="switchAdminTab('manage')" class="px-5 py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-newspaper"></i> Articles (<span id="adminArticleCount">0</span>)
+        </button>
+        <button id="adminTab4Btn" onclick="switchAdminTab('security')" class="px-5 py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex items-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-shield-halved"></i> Security
+        </button>
+      </div>
+
+      <!-- TAB 1: AI WRITER -->
+      <div id="adminTabWriter" class="space-y-6">
+        <div class="bg-gradient-to-r from-slate-900 to-brand-navy rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 text-amber-400 font-black text-sm uppercase tracking-wider mb-1">
+              <i class="fa-solid fa-key"></i> Gemini API Key
+            </div>
+            <p class="text-xs text-slate-300">Required to generate articles automatically from affiliate links.</p>
+          </div>
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <input type="password" id="adminApiKeyInput" placeholder="AIzaSy..." class="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 w-full md:w-72 font-mono">
+            <button onclick="saveAdminApiKey()" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-sm rounded-xl transition cursor-pointer shrink-0">
+              Save Key
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 space-y-5 text-sm">
+            <h3 class="text-lg font-black text-slate-800 border-b border-slate-100 pb-3 mb-4">
+              <i class="fa-solid fa-link text-brand-accent mr-2"></i> Deal Information
+            </h3>
+            
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Affiliate Destination URL <span class="text-red-500">*</span></label>
+              <div class="flex gap-2">
+                <input type="url" id="aiAffiliateUrl" placeholder="https://..." class="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl focus:border-blue-500 outline-none font-medium">
+                <button type="button" onclick="detectStoreFromUrl()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-xl text-xs transition shrink-0 cursor-pointer">
+                  <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Extract Store
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Product Name</label>
+                <input type="text" id="aiProductName" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:border-blue-500 outline-none font-medium">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Store / Brand</label>
+                <input type="text" id="aiStoreBrand" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:border-blue-500 outline-none font-medium">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Deal Price</label>
+                <input type="text" id="aiProductPrice" placeholder="$19.99" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:border-blue-500 outline-none font-medium">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Coupon Code</label>
+                <input type="text" id="aiCouponCode" placeholder="SAVE20" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl uppercase font-mono font-bold focus:border-blue-500 outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Target Category</label>
+              <select id="aiCategorySelect" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white focus:border-blue-500 outline-none font-medium"></select>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+              <div class="flex justify-between items-center mb-2">
+                <label class="font-bold text-slate-800"><i class="fa-solid fa-code text-indigo-500 mr-1"></i> Custom AI Prompt</label>
+                <button type="button" onclick="resetPromptToDefault()" class="text-xs text-brand-accent hover:underline font-bold cursor-pointer">Reset Default</button>
+              </div>
+              <textarea id="adminCustomPromptEditor" rows="6" class="w-full px-4 py-3 border border-indigo-100 bg-indigo-50/50 rounded-xl text-xs font-mono text-slate-700 custom-scrollbar outline-none focus:border-indigo-400"></textarea>
+            </div>
+
+            <button id="generateWithAiBtn" onclick="generateReviewWithGemini()" class="w-full py-4 bg-brand-accent hover:bg-brand-accentHover text-white font-black text-base rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer mt-4">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-200 group-hover:rotate-12 transition-transform text-lg"></i>
+              <span id="generateBtnText">Generate Article via Gemini</span>
+            </button>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 flex flex-col text-sm">
+            <h3 class="text-lg font-black text-slate-800 border-b border-slate-100 pb-3 mb-4 flex justify-between items-center">
+              <span><i class="fa-solid fa-file-signature text-emerald-600 mr-2"></i> Review & Publish</span>
+              <span id="aiStatusBadge" class="text-xs bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-bold">Awaiting Data</span>
+            </h3>
+
+            <div id="aiPreviewEmpty" class="my-auto py-20 text-center text-slate-400">
+              <i class="fa-solid fa-robot text-5xl mb-4 text-blue-100"></i>
+              <p class="font-bold text-slate-500">No article generated yet.</p>
+            </div>
+
+            <div id="aiPreviewFilled" class="hidden flex-col space-y-4 flex-grow">
+              <div><label class="block font-bold text-slate-700 mb-1">Title</label><input type="text" id="editAiTitle" class="w-full px-3 py-2 border border-slate-200 rounded-xl font-bold"></div>
+              <div><label class="block font-bold text-slate-700 mb-1">Excerpt</label><textarea id="editAiExcerpt" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-xl"></textarea></div>
+              <div><label class="block font-bold text-slate-700 mb-1">Full Content (HTML)</label><textarea id="editAiContent" rows="6" class="w-full px-3 py-2 border border-slate-200 rounded-xl font-mono text-xs"></textarea></div>
+              <input type="hidden" id="editAiCategory">
+              <input type="hidden" id="editAiReadTime" value="4 min read">
+              <input type="hidden" id="editAiRating" value="4.9">
+              <input type="hidden" id="editAiPros">
+              <input type="hidden" id="editAiCons">
+              
+              <div class="pt-4 mt-auto">
+                <button onclick="publishAiArticle()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                  <i class="fa-solid fa-cloud-arrow-up text-lg"></i> <span>Publish to Live Site</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: HOMEPAGE CUSTOMIZER -->
+      <div id="adminTabCustomizer" class="hidden bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
+        <h3 class="text-xl font-black text-slate-900 border-b border-slate-100 pb-4 mb-6"><i class="fa-solid fa-house-laptop mr-2 text-brand-navy"></i> Homepage Customizer</h3>
+        <form onsubmit="handleHomepageCustomizerSubmit(event)" class="space-y-6 text-sm">
+          <div class="grid grid-cols-2 gap-6">
+            <div><label class="block font-bold text-slate-700 mb-1">Brand Name</label><input type="text" id="custBrandName" class="w-full px-4 py-3 border rounded-xl"></div>
+            <div><label class="block font-bold text-slate-700 mb-1">Slogan</label><input type="text" id="custHeroSlogan" class="w-full px-4 py-3 border rounded-xl"></div>
+          </div>
+          <div><label class="block font-bold text-slate-700 mb-1">Description</label><textarea id="custHeroDesc" rows="3" class="w-full px-4 py-3 border rounded-xl"></textarea></div>
+          <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <button type="submit" class="px-8 py-3 bg-brand-navy text-white font-bold rounded-xl cursor-pointer">Save Changes</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TAB 3: MANAGE ARTICLES -->
+      <div id="adminTabManage" class="hidden bg-white rounded-3xl p-8 shadow-sm border border-slate-200">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+          <h3 class="text-xl font-black text-slate-900"><i class="fa-solid fa-newspaper mr-2 text-indigo-500"></i> Manage Articles</h3>
+          <button onclick="executeResetArticles()" class="text-sm font-bold text-rose-500 hover:underline cursor-pointer"><i class="fa-solid fa-rotate-left"></i> Reset Demo Data</button>
+        </div>
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-xs">
+              <th class="py-4 px-4 rounded-tl-xl">Title / Store</th>
+              <th class="py-4 px-4">Category</th>
+              <th class="py-4 px-4">Code</th>
+              <th class="py-4 px-4 text-center">Clicks</th>
+              <th class="py-4 px-4 text-right rounded-tr-xl">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminArticlesTableBody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+
+      <!-- TAB 4: SECURITY -->
+      <div id="adminTabSecurity" class="hidden bg-white rounded-3xl p-8 shadow-sm border border-slate-200 max-w-xl mx-auto">
+        <h3 class="text-xl font-black text-slate-900 border-b border-slate-100 pb-4 mb-6"><i class="fa-solid fa-shield-halved mr-2 text-emerald-500"></i> Admin Credentials</h3>
+        <form onsubmit="handleAccountSecuritySubmit(event)" class="space-y-5 text-sm">
+          <div><label class="block font-bold mb-1">New Username</label><input type="text" id="secNewUsername" required class="w-full px-4 py-3 border rounded-xl font-mono"></div>
+          <div><label class="block font-bold mb-1">New Password</label><input type="password" id="secNewPassword" required class="w-full px-4 py-3 border rounded-xl font-mono"></div>
+          <button type="submit" class="w-full py-4 bg-brand-navy text-white font-bold rounded-xl cursor-pointer mt-4">Update Credentials</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-brand-navy text-white mt-auto pt-16 pb-8 border-t border-blue-900/40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+        <div class="lg:col-span-2 space-y-4">
+          <div class="text-2xl font-black tracking-tight flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-brand-accent flex items-center justify-center text-sm font-bold">%</span>
+            <span>Coupons<span class="text-blue-300">Here</span></span>
+          </div>
+          <p class="text-sm font-bold text-blue-200 uppercase tracking-wider">Top Hub of US Online Coupons</p>
+          <p id="footerDescDisplay" class="text-sm text-slate-300 font-medium leading-relaxed max-w-md">
+            Find Better. Buy Smarter. A trusted destination for discovering online coupons, exclusive deals, and helpful product reviews.
+          </p>
+        </div>
+        <div>
+          <h4 class="text-sm font-black uppercase tracking-wider text-white mb-4">Explore</h4>
+          <ul class="space-y-3 text-sm font-medium text-slate-300">
+            <li><a href="javascript:void(0)" onclick="navigateTo('coupons')" class="hover:text-brand-accent transition">All Coupons</a></li>
+            <li><a href="javascript:void(0)" onclick="navigateTo('stores')" class="hover:text-brand-accent transition">Stores</a></li>
+            <li><a href="javascript:void(0)" onclick="navigateTo('categories')" class="hover:text-brand-accent transition">Categories</a></li>
+            <li><a href="javascript:void(0)" onclick="navigateTo('blogs')" class="hover:text-brand-accent transition">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-black uppercase tracking-wider text-white mb-4">Company</h4>
+          <ul class="space-y-3 text-sm font-medium text-slate-300">
+            <li><a href="javascript:void(0)" onclick="navigateTo('about-us')" class="hover:text-brand-accent transition">About Us</a></li>
+            <li><a href="javascript:void(0)" onclick="navigateTo('contact-us')" class="hover:text-brand-accent transition">Contact Us</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-black uppercase tracking-wider text-white mb-4">Legal</h4>
+          <ul class="space-y-3 text-sm font-medium text-slate-300">
+            <li><a href="javascript:void(0)" onclick="navigateTo('privacy-policy')" class="hover:text-brand-accent transition">Privacy Policy</a></li>
+            <li><a href="javascript:void(0)" onclick="navigateTo('terms-of-service')" class="hover:text-brand-accent transition">Terms of Service</a></li>
+            <li><a href="javascript:void(0)" onclick="navigateTo('cookie-policy')" class="hover:text-brand-accent transition">Cookie Policy</a></li>
+            <li><a href="javascript:void(0)" onclick="navigateTo('disclaimer')" class="hover:text-brand-accent transition">Disclaimer</a></li>
+          </ul>
+        </div>
+      </div>
+      <div id="footerCopyrightDisplay" class="pt-8 border-t border-blue-800/50 text-center text-xs font-medium text-slate-400">
+        &copy; 2026 couponshere.top. All rights reserved. Powered by Gemini AI SEO Engine.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Javascript Logic -->
+  <script>
+    // --- DATA & CONFIG ---
+    const DEFAULT_CATEGORIES = [
+      { id: "Adult 18 and over", name: "Adult 18 and over", icon: "🔞" },
+      { id: "Arts & crafts", name: "Arts & crafts", icon: "🎨" },
+      { id: "Babies and kids", name: "Babies and kids", icon: "👶" },
+      { id: "Beauty and fragrance", name: "Beauty and fragrance", icon: "💄" },
+      { id: "Bedding", name: "Bedding", icon: "🛏️" },
+      { id: "Books", name: "Books", icon: "📚" },
+      { id: "Clothing accessories", name: "Clothing accessories", icon: "👒" },
+      { id: "Computers", name: "Computers", icon: "💻" },
+      { id: "Decorations", name: "Decorations", icon: "🎄" },
+      { id: "Drinks", name: "Drinks", icon: "🍹" },
+      { id: "Education", name: "Education", icon: "🎓" },
+      { id: "Electronics", name: "Electronics", icon: "📱" }
+    ];
+
+    const DEFAULT_STORES = [
+      { name: "femme NATIVA", logoText: "femme NATIVA", cursive: true, offers: "5 offers", color: "bg-rose-50 text-rose-900 border-rose-100" },
+      { name: "Peptide Ritual", logoText: "CD R", cursive: false, offers: "2 offers", color: "bg-amber-50 text-amber-900 border-amber-100" },
+      { name: "MMO", logoText: "MMO", cursive: false, offers: "1 offers", color: "bg-slate-100 text-slate-800 border-slate-200" },
+      { name: "HALLO france", logoText: "HALLO", cursive: false, offers: "3 offers", color: "bg-blue-50 text-blue-800 border-blue-100" },
+      { name: "Track Speed", logoText: "Track Speed", cursive: false, offers: "1 offers", color: "bg-red-50 text-red-700 border-red-100" },
+      { name: "ARAMATEK", logoText: "ARAMATEK", cursive: false, offers: "1 offers", color: "bg-stone-100 text-stone-800 border-stone-200" }
+    ];
+
+    const DEFAULT_HOMEPAGE = {
+      brandName: "Coupons Here",
+      heroSlogan: "Find Better. Buy Smarter.",
+      heroDesc: "Coupons Here is a trusted destination for discovering online coupons, exclusive deals, and helpful product reviews. We help shoppers find better products, compare their options, and save more when shopping online.",
+      footerAbout: "A trusted destination for discovering online coupons, exclusive deals, and helpful product reviews.",
+      footerCopy: "© 2026 couponshere.top. All rights reserved. Powered by Gemini AI SEO Engine."
+    };
+
+    const DEFAULT_PROMPT = `Act as an elite affiliate review specialist and SEO copywriter for Coupons Here. Analyze the product below and output ONLY a raw JSON string:
+{
+  "title": "[Product Name] Review 2026: [Compelling Hook]",
+  "excerpt": "A concise 2-sentence SEO summary highlighting price, code, and key benefits.",
+  "readTime": "4 min read",
+  "rating": 4.8,
+  "pros": ["Pro 1", "Pro 2"],
+  "cons": ["Con 1"],
+  "fullContent": "<p>Content paragraph here...</p>"
+}
+Product: {product_name}
+Category: {category}
+Price: {price}
+Code: {coupon}
+Notes: {custom_notes}`;
+
+    const DEFAULT_ARTICLES = [
+      {
+        id: "art-1", title: "Rachael Attard Review 2026: Best Products + Exclusive Discount Deal", category: "Beauty and fragrance", brand: "femme NATIVA", 
+        excerpt: "Discover the Rachael Attard line starting at just $14.98. Explore our in-depth review of top formulas, brand insights, and current online promotions.", 
+        price: "$14.98", coupon: "FEMME2026", affiliateUrl: "https://example.com", clicks: 42, rating: 4.9, readTime: "3 min read"
+      },
+      {
+        id: "art-2", title: "Peptide Ritual Review 2026: Clinical Skincare & Top Deals Tested", category: "Beauty and fragrance", brand: "Peptide Ritual", 
+        excerpt: "Discover Peptide Ritual clinical-grade formulas. Explore verified reviews, top serums, and value sets starting from $25 with direct checkout savings.", 
+        price: "$25.00", coupon: "PEPTIDE30", affiliateUrl: "https://example.com", clicks: 29, rating: 4.8, readTime: "4 min read"
+      },
+      {
+        id: "art-3", title: "Carplaymmb Review 2026: Untether Your Dashboard for Less", category: "Electronics", brand: "Carplaymmb", 
+        excerpt: "Upgrade your dash with Carplaymmb wireless CarPlay adapters starting at $14.98. Explore setup perks, performance specs, and pricing insights.", 
+        price: "$14.98", coupon: "CARPLAY50", affiliateUrl: "https://example.com", clicks: 87, rating: 4.9, readTime: "4 min read"
+      }
+    ];
+
+    let articles = [];
+    let currentFilter = 'all';
+
+    // --- INIT & ROUTING ---
+    document.addEventListener('DOMContentLoaded', () => {
+      initApp();
+      handleUrlRoute();
+    });
+
+    window.addEventListener('popstate', handleUrlRoute);
+
+    function handleUrlRoute() {
+      const path = window.location.pathname.replace(/^\/|\/$/g, ''); 
+      const validRoutes = ['coupons', 'stores', 'categories', 'blogs', 'about-us', 'contact-us', 'privacy-policy', 'terms-of-service', 'cookie-policy', 'disclaimer'];
+      if (path === 'admin') navigateTo('admin', false);
+      else if (validRoutes.includes(path)) navigateTo(path, false);
+      else navigateTo('home', false);
+    }
+
+    function initApp() {
+      if (!localStorage.getItem('ch_articles')) localStorage.setItem('ch_articles', JSON.stringify(DEFAULT_ARTICLES));
+      articles = JSON.parse(localStorage.getItem('ch_articles'));
+      if (!localStorage.getItem('ch_homepage')) localStorage.setItem('ch_homepage', JSON.stringify(DEFAULT_HOMEPAGE));
+      if (!localStorage.getItem('ch_custom_prompt')) localStorage.setItem('ch_custom_prompt', DEFAULT_PROMPT);
+
+      const catSelect = document.getElementById('aiCategorySelect');
+      if (catSelect) {
+        catSelect.innerHTML = DEFAULT_CATEGORIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      }
+
+      renderStores();
+      renderCategories();
+      applySettings();
+      renderArticles();
+      updateStats();
+      
+      articles.sort((a,b) => b.clicks - a.clicks);
+    }
+
+    function navigateTo(route, pushState = true) {
+      document.getElementById('frontendContainer').classList.add('hidden');
+      document.getElementById('staticPagesContainer').classList.add('hidden');
+      document.getElementById('adminLoginContainer').classList.add('hidden');
+      document.getElementById('adminContainer').classList.add('hidden');
+      document.getElementById('bottomStatsSection').classList.add('hidden');
+      
+      document.querySelectorAll('#staticPagesContainer > div').forEach(p => p.classList.add('hidden'));
+      
+      const hero = document.getElementById('heroSection');
+      const reviews = document.getElementById('reviewSection');
+      const stores = document.getElementById('popularStoresSection');
+      const cats = document.getElementById('categoriesSection');
+      
+      hero.classList.remove('hidden'); reviews.classList.remove('hidden'); 
+      stores.classList.remove('hidden'); cats.classList.remove('hidden');
+
+      if (route === 'home') {
+        document.getElementById('frontendContainer').classList.remove('hidden');
+        document.getElementById('bottomStatsSection').classList.remove('hidden');
+        setCategoryFilter('all');
+      } else if (['coupons', 'stores', 'categories', 'blogs'].includes(route)) {
+        document.getElementById('frontendContainer').classList.remove('hidden');
+        hero.classList.add('hidden'); 
+        if (route === 'coupons' || route === 'blogs') { stores.classList.add('hidden'); cats.classList.add('hidden'); setCategoryFilter('all'); }
+        else if (route === 'stores') { reviews.classList.add('hidden'); cats.classList.add('hidden'); }
+        else if (route === 'categories') { reviews.classList.add('hidden'); stores.classList.add('hidden'); }
+      } else if (route === 'admin') {
+        const u = localStorage.getItem('ch_auth_username') || 'admin';
+        const session = sessionStorage.getItem('ch_admin_session');
+        if (session === 'true') {
+          document.getElementById('adminContainer').classList.remove('hidden');
+          document.getElementById('topAdminBar').classList.remove('hidden');
+          document.getElementById('topAdminUsername').textContent = u;
+          renderAdminTable();
+          document.getElementById('adminCustomPromptEditor').value = localStorage.getItem('ch_custom_prompt') || DEFAULT_PROMPT;
+          document.getElementById('adminApiKeyInput').value = localStorage.getItem('ch_gemini_key') || '';
+        } else {
+          document.getElementById('adminLoginContainer').classList.remove('hidden');
+          document.getElementById('topAdminBar').classList.add('hidden');
+        }
+      } else {
+        document.getElementById('staticPagesContainer').classList.remove('hidden');
+        const page = document.getElementById('page-' + route);
+        if (page) page.classList.remove('hidden');
+      }
+
+      if (pushState) window.history.pushState({route}, '', route === 'home' ? '/' : '/' + route);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- RENDERING ---
+    function updateStats() {
+      document.getElementById('statOffers').textContent = articles.length;
+      document.getElementById('statStores').textContent = DEFAULT_STORES.length;
+      document.getElementById('statCategories').textContent = DEFAULT_CATEGORIES.length;
+      if(document.getElementById('adminArticleCount')) document.getElementById('adminArticleCount').textContent = articles.length;
+    }
+
+    function applySettings() {
+      const s = JSON.parse(localStorage.getItem('ch_homepage'));
+      document.getElementById('heroTitleDisplay').textContent = s.brandName;
+      document.getElementById('heroSloganDisplay').textContent = s.heroSlogan;
+      document.getElementById('heroDescDisplay').textContent = s.heroDesc;
+      document.getElementById('footerDescDisplay').textContent = s.footerAbout;
+      document.getElementById('footerCopyrightDisplay').innerHTML = s.footerCopy;
+    }
+
+    function renderStores() {
+      document.getElementById('popularStoresContainer').innerHTML = DEFAULT_STORES.map(s => `
+        <div class="store-card bg-white rounded-2xl border ${s.color} p-4 text-center cursor-pointer shadow-sm">
+          <div class="h-10 flex items-center justify-center mb-1 font-black tracking-tight text-sm">${s.logoText}</div>
+          <div class="text-[10px] font-bold opacity-75 uppercase tracking-wider">${s.offers}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderCategories() {
+      document.getElementById('categoriesGrid').innerHTML = DEFAULT_CATEGORIES.map(c => `
+        <button onclick="setCategoryFilter('${c.id}')" class="flex flex-col items-center justify-center p-6 rounded-3xl border border-slate-200 bg-white hover:border-brand-accent hover:shadow-lg transition group cursor-pointer">
+          <span class="text-3xl mb-3 group-hover:scale-110 transition-transform">${c.icon}</span>
+          <span class="text-xs font-bold text-slate-700 text-center">${c.name}</span>
+        </button>
+      `).join('');
+    }
+
+    function renderArticles() {
+      let filtered = currentFilter === 'all' ? articles : articles.filter(a => a.category === currentFilter);
+      const q = document.getElementById('navSearchInput').value.toLowerCase();
+      if(q) filtered = filtered.filter(a => a.title.toLowerCase().includes(q) || a.brand.toLowerCase().includes(q));
+
+      document.getElementById('activeFilterPill').classList.toggle('hidden', currentFilter === 'all');
+      document.getElementById('activeFilterName').textContent = currentFilter;
+      document.getElementById('articleCountText').textContent = `Showing ${filtered.length} deals`;
+
+      if(filtered.length === 0) {
+        document.getElementById('articlesGrid').classList.add('hidden');
+        document.getElementById('emptyState').classList.remove('hidden');
+      } else {
+        document.getElementById('articlesGrid').classList.remove('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+        
+        document.getElementById('articlesGrid').innerHTML = filtered.map(art => {
+          const codeBlock = art.coupon ? `
+            <div class="mt-5 border-2 border-dashed border-brand-accent/40 rounded-2xl p-4 bg-red-50 text-center relative overflow-hidden group cursor-pointer" onclick="revealAndRedirect('${art.id}', '${art.coupon}', '${art.affiliateUrl}')">
+              <div class="text-[10px] text-brand-accent font-black uppercase tracking-widest mb-1">Exclusive Code</div>
+              <div id="code-${art.id}" class="font-mono text-xl font-black text-slate-900 code-blur">${art.coupon.replace(/./g, 'X')}</div>
+              <div class="absolute inset-0 bg-brand-accent/90 text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span class="text-xs font-black uppercase tracking-wider mb-1">Get Deal & Copy</span>
+                <i class="fa-solid fa-clone text-lg"></i>
+              </div>
+            </div>
+          ` : `
+            <div class="mt-5 border-2 border-slate-200 rounded-2xl p-4 bg-slate-50 text-center relative overflow-hidden group cursor-pointer" onclick="revealAndRedirect('${art.id}', '', '${art.affiliateUrl}')">
+              <div class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Deal Price</div>
+              <div class="font-mono text-xl font-black text-brand-navy">${art.price}</div>
+              <div class="absolute inset-0 bg-brand-navy text-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span class="text-xs font-black uppercase tracking-wider mb-1">Shop Now</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-lg"></i>
+              </div>
+            </div>
+          `;
+
+          return `
+            <article class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-200 hover:shadow-2xl transition-all duration-300 flex flex-col h-full">
+              <div class="flex justify-between items-center mb-4">
+                <div class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600">${art.category}</div>
+                <div class="flex items-center gap-1.5 text-amber-500 text-xs font-black"><i class="fa-solid fa-star"></i> ${art.rating}</div>
+              </div>
+              <h3 class="text-lg font-black text-slate-900 leading-snug mb-3 line-clamp-2">${art.title}</h3>
+              <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed flex-grow">${art.excerpt}</p>
+              ${codeBlock}
+              <div class="flex items-center justify-between text-[11px] text-slate-400 font-bold mt-5 pt-4 border-t border-slate-100">
+                <span><i class="fa-solid fa-user-pen mr-1"></i> Admin Team</span>
+                <span><i class="fa-solid fa-clock mr-1"></i> ${art.readTime}</span>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+    }
+
+    // --- ACTIONS ---
+    function setCategoryFilter(cat) { currentFilter = cat; renderArticles(); }
+    function resetFilters() { currentFilter = 'all'; document.getElementById('navSearchInput').value = ''; renderArticles(); }
+    function triggerHeaderSearch() { navigateTo('home'); renderArticles(); }
+    function handleHeaderSearch(e) { if(e.key === 'Enter') triggerHeaderSearch(); }
+
+    function revealAndRedirect(id, code, url) {
+      if(code) {
+        const el = document.getElementById(`code-${id}`);
+        if(el) { el.textContent = code; el.classList.remove('code-blur'); el.classList.add('code-revealed'); }
+        navigator.clipboard.writeText(code);
+        showToast('Code Copied! Redirecting to Store...', 'success');
+      } else {
+        showToast('Redirecting to Store Deal...', 'success');
+      }
+      
+      const index = articles.findIndex(a => a.id === id);
+      if(index > -1) { articles[index].clicks++; localStorage.setItem('ch_articles', JSON.stringify(articles)); }
+      
+      setTimeout(() => window.open(url, '_blank'), 800);
+    }
+
+    function showToast(msg, type='info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const bg = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-rose-600' : 'bg-slate-800';
+      toast.className = `${bg} text-white px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300`;
+      toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'} text-lg"></i> <span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
+      setTimeout(() => { toast.classList.add('opacity-0', 'scale-95'); setTimeout(()=>toast.remove(),300); }, 3000);
+    }
+
+    // --- ADMIN LOGIC ---
+    function handleAdminLoginSubmit(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginUsernameInput').value.trim();
+      const p = document.getElementById('loginPasswordInput').value.trim();
+      const storedU = localStorage.getItem('ch_auth_username') || 'admin';
+      const storedP = localStorage.getItem('ch_auth_password') || 'adminz2';
+
+      if (u === storedU && p === storedP) {
+        sessionStorage.setItem('ch_admin_session', 'true');
+        navigateTo('admin');
+        showToast('Login successful', 'success');
+      } else {
+        document.getElementById('loginErrorMessage').classList.remove('hidden');
+      }
+    }
+
+    function toggleLoginPasswordVisibility() {
+      const input = document.getElementById('loginPasswordInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      document.getElementById('loginPasswordEyeIcon').classList.toggle('fa-eye-slash');
+    }
+
+    function handleAdminLogout() {
+      sessionStorage.removeItem('ch_admin_session');
+      navigateTo('home');
+      showToast('Logged out securely', 'info');
+    }
+
+    function switchAdminTab(tab) {
+      ['Writer', 'Customizer', 'Manage', 'Security'].forEach(t => {
+        const isMatch = t.toLowerCase() === tab;
+        document.getElementById(`adminTab${t}`).classList.toggle('hidden', !isMatch);
+        const btn = document.getElementById(`adminTab${['Writer','Customizer','Manage','Security'].indexOf(t)+1}Btn`);
+        btn.classList.toggle('border-brand-accent', isMatch);
+        btn.classList.toggle('text-brand-accent', isMatch);
+        btn.classList.toggle('border-transparent', !isMatch);
+        btn.classList.toggle('text-slate-500', !isMatch);
+      });
+    }
+
+    // Tự động nhận diện Store từ liên kết Affiliate
+    function detectStoreFromUrl() {
+      const url = document.getElementById('aiAffiliateUrl').value.trim();
+      if (!url) return showToast('Please enter the Affiliate URL first!', 'error');
+      try {
+        const domain = new URL(url).hostname.replace(/^www\./, '');
+        const storeName = domain.split('.')[0].toUpperCase();
+        document.getElementById('aiStoreBrand').value = storeName;
+        showToast(`Detected store: ${storeName}`, 'success');
+      } catch (e) {
+        showToast('Invalid URL format. Please include https://', 'error');
+      }
+    }
+
+    // AI API
+    function saveAdminApiKey() {
+      const key = document.getElementById('adminApiKeyInput').value.trim();
+      if(key) { localStorage.setItem('ch_gemini_key', key); showToast('API Key saved', 'success'); }
+    }
+    
+    function resetPromptToDefault() {
+      document.getElementById('adminCustomPromptEditor').value = DEFAULT_PROMPT;
+      localStorage.setItem('ch_custom_prompt', DEFAULT_PROMPT);
+    }
+
+    async function generateReviewWithGemini() {
+      const key = localStorage.getItem('ch_gemini_key') || document.getElementById('adminApiKeyInput').value.trim();
+      if(!key) return showToast('Missing Gemini API Key! Please save your key above.', 'error');
+
+      const btn = document.getElementById('generateWithAiBtn');
+      const textSpan = document.getElementById('generateBtnText');
+      
+      const prodName = document.getElementById('aiProductName').value.trim() || 'Featured Product';
+      const storeName = document.getElementById('aiStoreBrand').value.trim() || 'Online Store';
+      const catText = document.getElementById('aiCategorySelect').options[document.getElementById('aiCategorySelect').selectedIndex]?.text || 'General';
+      const price = document.getElementById('aiProductPrice').value.trim() || 'Check price at store';
+      const coupon = document.getElementById('aiCouponCode').value.trim() || 'None';
+
+      let promptTemplate = document.getElementById('adminCustomPromptEditor').value;
+      let prompt = promptTemplate
+        .replace('{product_name}', prodName)
+        .replace('{store_name}', storeName)
+        .replace('{category}', catText)
+        .replace('{price}', price)
+        .replace('{coupon}', coupon)
+        .replace('{custom_notes}', 'Focus on pricing, exclusive discounts, product value and ease of purchase.');
+
+      try {
+        btn.disabled = true; 
+        textSpan.innerHTML = 'AI is writing review...';
+
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+          method: 'POST', 
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({contents:[{parts:[{text: prompt}]}]})
+        });
+
+        if(!res.ok) throw new Error('API connection failed');
+
+        const data = await res.json();
+        const rawContent = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+        const parsed = JSON.parse(rawContent);
+
+        document.getElementById('editAiTitle').value = parsed.title || `${prodName} Review 2026`;
+        document.getElementById('editAiExcerpt').value = parsed.excerpt || '';
+        document.getElementById('editAiContent').value = parsed.fullContent || '';
+        document.getElementById('editAiCategory').value = catText;
+        
+        document.getElementById('aiPreviewEmpty').classList.add('hidden');
+        document.getElementById('aiPreviewFilled').classList.remove('hidden');
+        document.getElementById('aiPreviewFilled').classList.add('flex');
+        
+        const badge = document.getElementById('aiStatusBadge');
+        badge.className = 'text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold';
+        badge.textContent = 'Draft Ready';
+
+        showToast('Review generated successfully!', 'success');
+      } catch(e) {
+        showToast('Generation failed. Please verify your Gemini API key.', 'error');
+      } finally {
+        btn.disabled = false; 
+        textSpan.innerHTML = 'Generate Article via Gemini';
+      }
+    }
+
+    function publishAiArticle() {
+      const newArticle = {
+        id: 'art-' + Date.now(),
+        title: document.getElementById('editAiTitle').value,
+        category: document.getElementById('editAiCategory').value,
+        brand: document.getElementById('aiStoreBrand').value || 'Store',
+        excerpt: document.getElementById('editAiExcerpt').value,
+        price: document.getElementById('aiProductPrice').value || 'Check price',
+        coupon: document.getElementById('aiCouponCode').value || '',
+        affiliateUrl: document.getElementById('aiAffiliateUrl').value || '#',
+        clicks: 0, 
+        rating: 4.9, 
+        readTime: '4 min read',
+        fullContent: document.getElementById('editAiContent').value
+      };
+
+      articles.unshift(newArticle);
+      localStorage.setItem('ch_articles', JSON.stringify(articles));
+      
+      updateStats(); 
+      renderArticles(); 
+      renderAdminTable();
+      
+      showToast('Article successfully published to live site!', 'success');
+
+      document.getElementById('editAiPreviewFilled').classList.add('hidden');
+      document.getElementById('aiPreviewEmpty').classList.remove('hidden');
+      document.getElementById('aiStatusBadge').className = 'text-xs bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-bold';
+      document.getElementById('aiStatusBadge').textContent = 'Awaiting Data';
+      document.getElementById('aiProductName').value = '';
+      document.getElementById('aiProductPrice').value = '';
+      document.getElementById('aiCouponCode').value = '';
+    }
+
+    function handleHomepageCustomizerSubmit(e) {
+      e.preventDefault();
+      localStorage.setItem('ch_homepage', JSON.stringify({
+        brandName: document.getElementById('custBrandName').value,
+        heroSlogan: document.getElementById('custHeroSlogan').value,
+        heroDesc: document.getElementById('custHeroDesc').value
+      }));
+      applySettings(); 
+      showToast('Saved', 'success');
+    }
+
+    function renderAdminTable() {
+      document.getElementById('adminArticlesTableBody').innerHTML = articles.map(a => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50">
+          <td class="py-3 px-4 font-bold text-slate-800">${a.title}</td>
+          <td class="py-3 px-4 text-xs font-bold text-blue-600">${a.category}</td>
+          <td class="py-3 px-4 font-mono text-xs">${a.coupon || '-'}</td>
+          <td class="py-3 px-4 text-center font-bold text-slate-600">${a.clicks}</td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="deleteArticle('${a.id}')" class="text-rose-500 hover:text-rose-700 cursor-pointer"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function deleteArticle(id) {
+      articles = articles.filter(a => a.id !== id);
+      localStorage.setItem('ch_articles', JSON.stringify(articles));
+      renderAdminTable(); 
+      renderArticles(); 
+      updateStats();
+    }
+    
+    function executeResetArticles() {
+      articles = JSON.parse(JSON.stringify(DEFAULT_ARTICLES));
+      localStorage.setItem('ch_articles', JSON.stringify(articles));
+      renderAdminTable(); 
+      renderArticles(); 
+      updateStats();
+    }
+
+    function handleAccountSecuritySubmit(e) {
+      e.preventDefault();
+      localStorage.setItem('ch_auth_username', document.getElementById('secNewUsername').value);
+      localStorage.setItem('ch_auth_password', document.getElementById('secNewPassword').value);
+      showToast('Credentials Updated', 'success');
+    }
+  </script>
+</body>
+</html>
