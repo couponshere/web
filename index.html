@@ -673,8 +673,7 @@ Notes: {custom_notes}`;
       document.getElementById('heroSloganDisplay').textContent = s.heroSlogan;
       document.getElementById('heroDescDisplay').textContent = s.heroDesc;
       document.getElementById('footerDescDisplay').textContent = s.footerAbout;
-      document.getElementById('footerCopyrightDisplay').innerHTML = s.footerCopy;
-    }
+      document.getElementById('footerCopyrightDisplay').innerHTML = s.footerCopy || '© Couponshere.top. All rights reserved.';    }
 
     function renderStores() {
       document.getElementById('popularStoresContainer').innerHTML = DEFAULT_STORES.map(s => `
