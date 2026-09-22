@@ -787,8 +787,8 @@ Notes: {custom_notes}`;
       e.preventDefault();
       const u = document.getElementById('loginUsernameInput').value.trim();
       const p = document.getElementById('loginPasswordInput').value.trim();
-      const storedU = localStorage.getItem('ch_auth_username') || 'admin';
-      const storedP = localStorage.getItem('ch_auth_password') || 'adminz2';
+      const storedU = localStorage.getItem('ch_auth_username') || 'admin@geddjki';
+      const storedP = localStorage.getItem('ch_auth_password') || 'adminz23523f';
 
       if (u === storedU && p === storedP) {
         sessionStorage.setItem('ch_admin_session', 'true');
@@ -852,7 +852,7 @@ Notes: {custom_notes}`;
       // API Key của bạn
       const key = 'AIzaSy...'; // Điền key của bạn vào đây
       
-      if(!key || key.includes('AIzaSy...')) return showToast('Vui lòng điền đúng API Key.', 'error');
+     if (!key || key.trim() === '') return showToast('Vui lòng điền đúng API Key.', 'error');
 
       const btn = document.getElementById('generateWithAiBtn');
       const textSpan = document.getElementById('generateBtnText');
