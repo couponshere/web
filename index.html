@@ -345,8 +345,15 @@
             </div>
             <p class="text-xs text-slate-300">Required to generate articles automatically from affiliate links.</p>
           </div>
-          <div class="flex items-center gap-2 w-full md:w-auto">
-            <input type="password" id="adminApiKeyInput" placeholder="AIzaSy..." class="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 w-full md:w-72 font-mono">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+            <input 
+              type="text" 
+              id="adminApiKeyInput" 
+              placeholder="Paste AIzaSy... here" 
+              onfocus="handleApiKeyFocus(this)" 
+              onblur="handleApiKeyBlur(this)"
+              class="px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-amber-300 placeholder-slate-400 focus:outline-none focus:border-amber-400 w-full md:w-80 font-mono tracking-wider"
+            >
             <button onclick="saveAdminApiKey()" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-sm rounded-xl transition cursor-pointer shrink-0">
               Save Key
             </button>
@@ -837,22 +844,81 @@ Notes: {custom_notes}`;
       }
     }
 
-    // AI API
-    function saveAdminApiKey() {
-      const key = document.getElementById('adminApiKeyInput').value.trim();
-      if(key) { localStorage.setItem('ch_gemini_key', key); showToast('API Key saved', 'success'); }
-    }
-    
-    function resetPromptToDefault() {
-      document.getElementById('adminCustomPromptEditor').value = DEFAULT_PROMPT;
-      localStorage.setItem('ch_custom_prompt', DEFAULT_PROMPT);
+    // --- QUẢN LÝ HIỂN THỊ 5 CHỮ ĐẦU & 5 CHỮ CUỐI CỦA API KEY ---
+    function formatMaskedKey(fullKey) {
+      if (!fullKey) return '';
+      const clean = fullKey.trim();
+      if (clean.length <= 10) return clean;
+      // Lấy 5 ký tự đầu + ... + 5 ký tự cuối
+      return `${clean.slice(0, 5)}...${clean.slice(-5)}`;
     }
 
-    async function generateReviewWithGemini() {
-      // API Key của bạn
-      const key = 'AIzaSy...'; // Điền key của bạn vào đây
+    function refreshApiKeyInputDisplay() {
+      const stored = localStorage.getItem('ch_gemini_key') || '';
+      const input = document.getElementById('adminApiKeyInput');
+      if (!input) return;
       
-     if (!key || key.trim() === '') return showToast('Vui lòng điền đúng API Key.', 'error');
+      if (stored) {
+        input.value = formatMaskedKey(stored);
+      } else {
+        input.value = '';
+      }
+    }
+
+    function handleApiKeyFocus(input) {
+      // Khi người dùng click vào để sửa: hiển thị key gốc để tiện copy/paste
+      const stored = localStorage.getItem('ch_gemini_key') || '';
+      if (stored && input.value.includes('...')) {
+        input.value = stored;
+      }
+      input.select();
+    }
+
+    function handleApiKeyBlur(input) {
+      // Khi rời chuột ra ngoài: format lại dạng 5 đầu 5 cuối
+      const val = input.value.trim();
+      if (val && !val.includes('...')) {
+        localStorage.setItem('ch_gemini_key', val);
+        input.value = formatMaskedKey(val);
+      } else if (!val) {
+        localStorage.removeItem('ch_gemini_key');
+      }
+    }
+
+    function saveAdminApiKey() {
+      const input = document.getElementById('adminApiKeyInput');
+      const val = input.value.trim();
+
+      // Nếu đang ở dạng rút gọn 5...5 và không bị sửa đổi thì giữ nguyên key cũ
+      if (val.includes('...')) {
+        const stored = localStorage.getItem('ch_gemini_key');
+        if (stored) {
+          showToast(`Đang dùng key: ${formatMaskedKey(stored)}`, 'success');
+          return;
+        }
+      }
+
+      if (!val) {
+        localStorage.removeItem('ch_gemini_key');
+        return showToast('Khóa API không được để trống!', 'error');
+      }
+
+      // Lưu key đầy đủ
+      localStorage.setItem('ch_gemini_key', val);
+      input.value = formatMaskedKey(val);
+      showToast(`Đã lưu key (${formatMaskedKey(val)}) thành công!`, 'success');
+    }
+
+    // --- GỌI GEMINI API SỬ DỤNG CHÍNH XÁC KEY ĐÃ LƯU ---
+    async function generateReviewWithGemini() {
+      // Đọc trực tiếp từ localStorage để lấy key gốc đầy đủ
+      let key = localStorage.getItem('ch_gemini_key') || '';
+      key = key.trim();
+
+      if (!key) {
+        document.getElementById('adminApiKeyInput').focus();
+        return showToast('Chưa có Gemini API Key! Hãy dán và lưu key ở khung phía trên.', 'error');
+      }
 
       const btn = document.getElementById('generateWithAiBtn');
       const textSpan = document.getElementById('generateBtnText');
@@ -863,29 +929,29 @@ Notes: {custom_notes}`;
       const price = document.getElementById('aiProductPrice').value.trim() || 'Check price at store';
       const coupon = document.getElementById('aiCouponCode').value.trim() || 'None';
 
-      let promptTemplate = document.getElementById('adminCustomPromptEditor').value;
+      let promptTemplate = document.getElementById('adminCustomPromptEditor').value || DEFAULT_PROMPT;
       let prompt = promptTemplate
         .replace('{product_name}', prodName)
         .replace('{store_name}', storeName)
         .replace('{category}', catText)
         .replace('{price}', price)
         .replace('{coupon}', coupon)
-        .replace('{custom_notes}', 'Focus on pricing, exclusive discounts, product value and ease of purchase.');
+        .replace('{custom_notes}', 'Focus on pricing, discounts, specifications and purchase CTA.');
 
       try {
         btn.disabled = true; 
-        textSpan.innerHTML = 'AI is writing review...';
+        textSpan.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Gemini (${formatMaskedKey(key)}) đang viết...`;
 
-        // Gọi model gemini-2.5-flash
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`, {
           method: 'POST', 
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({contents:[{parts:[{text: prompt}]}]})
         });
 
-        if(!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData?.error?.message || 'API connection failed');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          const errMsg = errData?.error?.message || `Lỗi máy chủ HTTP ${res.status}`;
+          throw new Error(errMsg);
         }
 
         const data = await res.json();
@@ -907,13 +973,13 @@ Notes: {custom_notes}`;
 
         showToast('Tạo bài viết thành công!', 'success');
       } catch(e) {
+        console.error("Gemini Error:", e);
         showToast('Lỗi: ' + e.message, 'error');
       } finally {
         btn.disabled = false; 
         textSpan.innerHTML = 'Generate Article via Gemini';
       }
     }
-
     function publishAiArticle() {
       const newArticle = {
         id: 'art-' + Date.now(),
